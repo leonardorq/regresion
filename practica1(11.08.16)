@@ -22,3 +22,10 @@ detach(base1.1)
 summary(base1.1$edad)
 #hace im resumen de estadísticas descriptivas básicas: min, 1er cuartil, mediana, media, 3er cuartil
 # y max
+##importar base de datos
+#se utiliza el paquete foreign
+install.packages("foreign")
+#con esto se llama el foreign
+require(foreign)
+#con el comando read.dbf se carga la base desde su ubicación
+sociodem<-read.dbf("C://Users//SALA-C27//Documents//SDEMT215.dbf") 
