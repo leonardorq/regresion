@@ -1,0 +1,54 @@
+#4.1 Recodificación de variables numéricas (rangos)
+
+#Método 1
+
+SDEMT215$EDAD11[as.numeric(SDEMT215$EDA)>= 0 & as.numeric(SDEMT215$EDA)<=10]<-1
+SDEMT215$EDAD11[as.numeric(SDEMT215$EDA)>= 11 & as.numeric(SDEMT215$EDA)<=20]<-2
+SDEMT215$EDAD11[as.numeric(SDEMT215$EDA)>= 21 & as.numeric(SDEMT215$EDA)<=30]<-3
+SDEMT215$EDAD11[as.numeric(SDEMT215$EDA)>= 31 & as.numeric(SDEMT215$EDA)<=40]<-4
+SDEMT215$EDAD11[as.numeric(SDEMT215$EDA)>= 41]<-5
+detach(SDEMT215)
+#as.numeric() cambia una variable de caracter a numérico y al revés es as.character()
+
+ls(SDEMT215)
+#muestra todas las variables de la base en una lista
+
+table(SDEMT215$EDAD11)
+class(SDEMT215$ENT)
+SDEMT215$ENT<-as.character(as.numeric(SDEMT215$ENT))
+
+#Método2
+SDEMT215$EDAD111<-ifelse(as.numeric(SDEMT215$EDA)>=0 & as.numeric(SDEMT215$EDA)<=10,1,
+                        ifelse(as.numeric(SDEMT215$EDA)>=11 & as.numeric(SDEMT215$EDA)<=20,2,
+                        ifelse(as.numeric(SDEMT215$EDA)>=21 & as.numeric(SDEMT215$EDA)<=30,3,
+                        ifelse(as.numeric(SDEMT215$EDA)>=31 & as.numeric(SDEMT215$EDA)<=40,4,5))))
+table(SDEMT215$EDAD111)
+
+#4.2 Recodificación de variables tipo caracter
+
+class(SDEMT215$R_DEF)
+SDEMT215$VALIDO[as.character(SDEMT215$R_DEF)!="00"]<-"Entrevista completa"
+SDEMT215$VALIDO[as.character(SDEMT215$R_DEF)=="00"]<-"Entrevista incompleta"
+#forma de crear variable
+
+table(SDEMT215$VALIDO)
+
+#######################################################################
+
+#5. Subconjunto de datos
+#5.1 Seleccionando variables de interes
+var<-c("R_DEF","LOC","MUN","C_RES")
+newdata1<-SDEMT215[,var]
+#al poner el corchete la 1a entrada es fila y la 2a columna
+#por eso pusimos [,var]
+
+#para seleccionar casos u observaciones se usa la función subset()
+?subset
+ 
+mujer<-subset(SDEMT215,SDEMT215$SEX==2)
+#hace un subconjunto solo de mujeres
+table(mujer$SEX)
+
+mujer$CD_A<-as.character(mujer$CD_A)
+mujer1<-subset(mujer,mujer$CD_A=="02" | mujer$CD_A=="16")
+table(mujer1$CD_A)
