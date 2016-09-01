@@ -1,0 +1,38 @@
+estatura<-c(1.2,1.23,1.19,1.32,1.28,1.22,1.17,1.29,1.33,1.15)
+niveleco<-c(110,130,108,167,156,115,104,138,170,107)
+#Queremos comprobar la hipótesis a mayor ingreso de la familia, mayor estatura en los niños
+
+#Paso1: Obtener el gráfico de dispersión
+plot(niveleco,estatura,pch=20,xlab="Ingreso Económico",ylab="Estatura",main="Gráfica de Dispersión",col="blue")
+
+#Paso2: Se calcula el coeficiente de correlación con la función cor()
+?cor
+#El argumento "use" no considera los datos perdidos y si lo dejamos por default usa todos
+#El argumento "method" nos da a elegir el método de cálculo Pearson, Kendall o Spearman
+cor(niveleco,estatura,method="pearson")
+#Como el coef de correl es 0.9556 hay una relación muy alta y positiva en los datos
+
+#Paso3: Aplicamos una prueba de la correlación con la función cor.test()
+?cor.test
+#hace una prueba de hipótesis para la función es Ho = r=0, es decir si no hay relación Ha=! 0 si relación
+cor.test(estatura,niveleco,method="pearson")
+#Si p-value<0.05 rechazamos Ho 
+#En este caso p-value=1.607e-5, por lo que sí hay relación
+
+#Paso4: Una vez confirmada la correlación, aplicamos el modelo, para hacerlo se usa la funcion lm()
+mod1<-lm(estatura~niveleco)
+summary(mod1)
+#la función summary() manda a llamar el modelo 
+#los residuales generan las diferencias entre los valores ajustados y los reales entre más cercano
+#   a cero, mejor es el modelo
+#Los coefcientes Bo y B1 serán los de la recta y están en la sección de "coefficents" "estimate"
+plot(niveleco,estatura,pch=20,xlab="Ingreso Económico",ylab="Estatura",main="Gráfica de Dispersión",col="blue")
+abline(mod1,col="orange")
+#la función abline() da la recta de regresión  
+names(mod1)
+mod1$coefficients
+#La recta que mejor se ajusta (del modelo de regresión) es estatura=0.9323+0.0023*niveleco
+
+#Paso5: verificación de los supuestos
+
+#Paso6: explicación del modelo
