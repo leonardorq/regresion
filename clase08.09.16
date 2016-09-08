@@ -1,0 +1,34 @@
+#######################################
+summary(mod1)$coefficients
+#La recta que mejor se ajusta (del modelo de regresión) es 
+estatura=0.9323+0.0023 niveleco
+#los valores de pvalue son inferiores a 0.05 por lo que la relación lineal entre la var dep y la indep
+#es positiva; por cada peso de ingreso que aumenta el padre o madre, aumenta la estatura en 0.0023
+#el error estándar residual es 0.0198 este valor es muy importante debido a que permite medir la calidad
+#del modelo, permitiendo generar intervalos de confianza
+
+summary(mod1)
+
+#para calcular los intervalos de confianza se usa la función confint()
+confint(mod1,level=0.95)
+#Con una probabilidad de 95%, b0 se encuentra en el intervalo (0.8542,1.0105) y b1 (0.0017,0.0029)
+
+#BONDAD DE AJUSTE
+#se verifica la calidad del modeloal interpretar la var dep y se utiliza la tabla ANOVA
+anova(mod1)
+#en este caso la variabilidad explicada del modelo es 0.033022=SSM 
+#se revisa la SSR=0.0031, revisando los valores del summary el estadístico F>1 y pvalue<0.05
+#con estas revisiones se puede mencionar que se rechaza la hipótesis nula de F=1 y se puede establecer
+#un modelo
+
+#TABLA ANOVA
+#Sum sq -> suma de cuadradados de la var indep
+#F value -> debe ser >1
+#Revisar R^2 multiple, alrededor de 91.3% de la varaibilidad de la estatura es explicada por la recta ajustada
+#eN EL ANÁLISIS DE REGRESIÓN se interpreta la R múltiple y no la ajustada
+
+##################SUPUESTOS######################
+base1<-data.frame(niveleco,estatura)
+base1$fitted.mod1<-fitted(mod1)
+base1$residuals.mod1<-residuals(mod1)
+base1$rstudent.mod1<-rstudent(mod1)
