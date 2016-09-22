@@ -1,0 +1,61 @@
+install.packages("car")
+estatura <- c(1.2, 1.23, 1.19, 1.32, 1.28, 1.22, 1.17, 1.29, 1.33, 1.15)
+niveleco <- c(110, 130, 108, 167, 156, 115, 104, 138, 170, 107)
+mod1<-lm(estatura~niveleco)
+base1<-data.frame(niveleco,estatura)
+base1$ajuste.mod1<-fitted(mod1) #valor ajustado
+base1$residuales.mod1<-residuals(mod1) #residuos del modelo
+base1$rstudent.mod1<-rstudent(mod1) #residuos estudentizados
+
+#Estas variables se utilizan para comprobar los supuestos:
+
+#1.Supuesto de normalidad-> es que los residuos tengan distribución normal
+#  para conocer la normalidad se utiliza la prueba de Shapiro para analizar los residuos
+shapiro.test(base1$rstudent.mod1)
+#Prueba de hipótesis del Shapiro Test:
+# ----Ho: la muestra tiene distribución normal
+# ----Ha: la muestra no tiene distribución normal
+#Tenemos un p-value de 0.8172 no se rechaza la hipótesis nula
+#Por lo tanto se acepta que hay normalidad
+#El resultado gráfico es:
+qqnorm(base1$rstudent.mod1, main= "Normal (0,1)")
+#Se obtiene el gráfico de dispersión con la normal (0,1)
+qqline(base1$rstudent.mod1)
+
+#NOTA:Con la obtención del Shapiro Test es suficiente para comprobar normalidad
+
+#1.1 Homogeneidad de las varianzas
+install.packages("lmtest")
+require(lmtest)
+bptest(mod1)
+#En esta prueba esperamos homegeneidad de la varianza
+#--Ho: sí hay homogeneidad en las varianzas
+#--Ha: no hay homogeneidad en las varianzas
+#En el bptest se obtuvo un p-value de 0.6108, por lo tanto no se rechaza la Ho
+#Para no rechazar Ho, necesitamos tener un p-value>0.05
+#Para mod1 se puede decir que hay homogeneidad  en las varianzas
+
+#2. Prueba de autocorrelación o independencia
+#Se usa la prueba Durbin Watson
+#--Ho: no hay autocorrelación en los residuos
+#--Ha: sí hay autocorrelación en los residuos
+dwtest(mod1,alternative = "two.sided")
+#La prueba genera un p-value de 0.9142, por lo que no se rechaza la hipótesis nula
+#debido a que tenemos un p-value>0.05
+
+#Otra forma de evaluar la prueba de Durbin Watson es con el valor 1.5<DW<2.5, si está
+#dentro del rango se puede decir que no hay autocorrelación en los residuos
+#De manera gráfica...
+plot(base1$residuales.mod1, pch=100,ylab="Residuales",xlab = "in")
+abline(h=cor(base1$estatura,base1$niveleco))
+#En este caso se puede ver que tenemos una gráfica sin patrón, que es lo que estamos esperando
+#lo que confirma que no hay autocorrelación
+
+#Puede haber un problema de rangos si predecimos sin considerar rangos de nuestra variable
+#Por lo que definimosuna nueva base con los límites
+limbase1<-seq(min(base1$niveleco), max(base1$niveleco), length=10)
+limbase1<-data.frame(limbase1)
+limbasep<-predict.lm(mod1,limbase1,interval="prediction",se.fit=TRUE,data=base1)
+head(limbasep$fit)
+#Para dibujar los límites
+matplot(limbase1,limbasep$fit,type="l",xlab="Ingreso", ylab="Estatura")
