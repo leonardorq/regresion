@@ -1,0 +1,121 @@
+##Modelo de regresión múltiple##
+capa<-c(4330,5500,5500,4700,5200,5500,4700,5500,5800,5000) #var indep 2, capacidad
+calidad<-c(2,3,4,3,4,4,4,5,5,5) #var indep 1, calidad 5 es mala
+precio<-c(190,219,249,249,250,340,289,395,439,525)#var dep
+mochil<-data.frame(precio,capa,calidad)
+
+#Se aplica la correlación
+cor(mochil,use="everything", method = "pearson")
+#Se observa una baja correlación entre precio y capacidad
+
+#Se aplica el modelo
+modmo<-lm(precio~calidad+capa)
+summary(modmo)
+#Se revisa la R^2 ajustada pore ser un modelo de regresión múltiple
+#En un modelo de regresión lineal se revisa la R^2 múltiple
+#La R^2 ajustada es de 0.7, lo que explica en 70% la variabilidad del modelo
+#Revisando el valor de F>1 y p-value<0.05 para saber si cumple
+#Estamos ante un buen modelo y se procede al diagnóstico
+#El diagnóstico se realiza para poder generalizar los resultados del modelo a partir de la revisión
+#  de los supuestos
+
+#Se observa gráficamente el mrm
+#which es el argumento de los supuestos
+
+##Supuesto 1##
+plot(modmo,which=1,pch=3)
+#se espera que los residuales se distribuyan sin patrón
+#Una tendencia en la variabilidad de los residuos sugiere que la varianza está relacionada con la media,
+#  violando el supuesto de varianza constante
+
+##Supuesto de normalidad##
+plot(modmo,which=2,pch=3)
+#Se espera que los residuos estén tipificados alrededor de la línea, se observa que sí hay 
+#  distribución normal
+
+##Supuesto de residuos estandarizados##
+#Los residuos están estandarizados por sus desvest estimadas
+plot(modmo,which=3,pch=4)
+#Se observa si los residuos se distribuyen constantes en los valores ajustados, se espera
+#  una gráfica sin patrón observable
+
+##Supuesto 4##
+plot(modmo,which=5,pch=3)
+#Expone la importancia de cada observación en el modelo en esta distancia el gráfico nos muestra
+#  las observaciones que podrían impactar en el modelo, por lo que se sugiere eliminarlas
+#Como en las observaciones se sugiere eliminar los datos 1,7 y 10, procedemos a eliminarlos de
+#  la base
+mochil1<-mochil[c(-1,-7,-10),]
+
+#Probando si sale un mejor modelo
+cor(mochil1)
+
+modmo1<-lm(precio~calidad+capa,mochil1)
+summary(modmo1)
+#La R^2 ajustada bajó a 0.64 y el p-value=0.05
+#El modelo no mejora, por lo que es mejor conservar el primer modelo
+
+###############
+###############
+#Después del análisis gráfico se aplican pruebas para confirmar si el mrm cumple con los supuestos
+#Para aplicar las pruebas se generan los valores ajustados, residuales y estandarizados
+mochil$ajustados<-fitted(modmo)
+#la fuinción fitted saca los valores ajustados
+mochil$res<-residuals(modmo)
+mochil$rstud<-rstudent(modmo)
+
+#Prueba de normalidad
+#Se requiere la paquetería lmtest
+install.packages("lmtest")
+require(lmtest)
+#require es igual que library
+ks.test(mochil$rstud,"pnorm")
+#Se plantea una prueba de hipótesis y se espera un p-value>0.05
+#Como el p-value es 0.79 no se rechaza Ho y se acepta que hay normalidad
+
+#Prueba de homogeneidad de varianzas
+bptest(modmo,studentize = FALSE, data=mochil)
+#se pone studentize= FALSE para hacer el análisis con los residuales normales
+#Pasa la prueba porque p-value=0.49>0.005
+
+#Prueba de Autocorrelación 
+#También llamada prueba de Durbin Watson
+dwtest(modmo,alternative="two.sided", data=mochil)
+#En esta prueba hay dos formas de comprobar:
+#1)p-value>0.05
+#2)1.5<DW<2.5
+
+#Hasta aquí podríamos confirmar que tenemos un modelo con buen ajuste, sin embargo, hay que
+#  revisar los casos atípicos se usa la librería car
+install.packages("car")
+library(car)
+outlierTest(modmo)
+
+#Una vez que observamos los casos atípicos procedemos a conocer la influencia de estos casos en
+#  en el modelo para observar la influencia se utiliza la función inlfuence.measures()
+influ<-influence.measures(modmo)
+summary(influ)
+#1a columna: casos potencialmente influyentes
+#Las columnas que hacen referencia a dbf nos indican la influencia en los coeficientes del modelo
+#Las columnas que nos presentan mayor interés son las cook.d y hat, que exponen con mayor claridad
+#  la influencia.
+
+#cook.d-> es la distancia de Cook y entre más cercano a 1 hay mayor influencia de observación
+#En este caso la observación 10 es la que tiene mayor distancia de Cook, en esta distancia 
+#  mayores a 1 hay certeza de que sí influyen
+
+#hat-> se asocia con las medidas de leverage que varían entre 0 y 1, entre más cercano a 1 mayor
+#  influencia.
+
+#Además de estas pruebas se hace el análisis gráfico de los casos influyentes para este análisis
+#  está la función influecePlot()...(requiere la librería car)
+influencePlot(modmo)
+
+#El análisis de este gráfico se realiza con base en el tamaño de las circunferencias que arroja
+# es decir a mayor circunferencia de la observación, mayor influencia
+install.packages("faraway")
+require(faraway)
+dc<-cooks.distance(modmo)
+etiqueta<-rownames(mochil)
+halfnorm(dc,3,etiqueta)
+#el 3 es por las 3 observaciones con mayor distancia de Cook
