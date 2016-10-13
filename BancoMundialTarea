@@ -1,0 +1,137 @@
+base1<-read.csv("C://Users//Amy//Documents//WDI_Data.csv")
+mexico<-subset(base1,base1$Country.Name=="Mexico")
+brasil<-subset(base1,base1$Country.Name=="Brazil")
+argentina<-subset(base1,base1$Country.Name=="Argentina")
+#mexico1<-subset(mexico,mexico$Indicator.Code=="SP.DYN.TFRT.IN"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.POP.GROW"|Indicator.Code=="SP.URB.TOTL.IN.ZS"|Indicator.Code=="NY.GDP.PCAP.KD"|Indicator.Code=="SE.ADT.LITR.FE.ZS"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.DYN.LE00.FE.IN"|Indicator.Code=="SE.ADT.LITR.MA.ZS")
+#mexico2<-mexico1[,c(1,2,3,4,50,51,52,53,54,55,56,57,58,59,60)]
+#brasil1<-subset(brasil,brasil$Indicator.Code=="SP.DYN.TFRT.IN"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.POP.GROW"|Indicator.Code=="SP.URB.TOTL.IN.ZS"|Indicator.Code=="NY.GDP.PCAP.KD"|Indicator.Code=="SE.ADT.LITR.FE.ZS"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.DYN.LE00.FE.IN"|Indicator.Code=="SE.ADT.LITR.MA.ZS")
+#brasil2<-brasil1[,c(1,2,3,4,50,51,52,53,54,55,56,57,58,59,60)]
+argentina1<-subset(argentina,argentina$Indicator.Code=="SP.DYN.TFRT.IN"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.POP.GROW"|Indicator.Code=="SP.URB.TOTL.IN.ZS"|Indicator.Code=="NY.GDP.PCAP.KD"|Indicator.Code=="SE.ADT.LITR.FE.ZS"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.DYN.LE00.FE.IN"|Indicator.Code=="SE.ADT.LITR.MA.ZS")
+argentina2<-argentina1[,c(50,51,52,53,54,55,56,57,58,59,60)]
+argentina3<-t(argentina2)
+argentina4<-data.frame(argentina3)
+colnames(argentina4)<-c("Fertilidad","PIB","Esperanza de Vida","LetradosH","LetradosM","T.Mortalidad","Crecimiento anual","PoblacionUrb")
+mexico1<-subset(mexico,mexico$Indicator.Code=="SP.DYN.TFRT.IN"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.POP.GROW"|Indicator.Code=="SP.URB.TOTL.IN.ZS"|Indicator.Code=="NY.GDP.PCAP.KD"|Indicator.Code=="SE.ADT.LITR.FE.ZS"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.DYN.LE00.FE.IN"|Indicator.Code=="SE.ADT.LITR.MA.ZS")
+mexico2<-mexico1[,c(50,51,52,53,54,55,56,57,58,59,60)]
+mexico3<-t(mexico2)
+mexico4<-data.frame(mexico3)
+colnames(mexico4)<-c("Fertilidad","PIB","Esperanza de Vida","AlfabetasH","AlfabetasM","T.Mortalidad","Crecimiento anual","PoblacionUrb")
+brasil1<-subset(brasil,brasil$Indicator.Code=="SP.DYN.TFRT.IN"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.POP.GROW"|Indicator.Code=="SP.URB.TOTL.IN.ZS"|Indicator.Code=="NY.GDP.PCAP.KD"|Indicator.Code=="SE.ADT.LITR.FE.ZS"|Indicator.Code=="SP.DYN.IMRT.IN"|Indicator.Code=="SP.DYN.LE00.FE.IN"|Indicator.Code=="SE.ADT.LITR.MA.ZS")
+brasil2<-brasil1[,c(50,51,52,53,54,55,56,57,58,59,60)]
+brasil3<-t(mexico2)
+brasil4<-data.frame(brasil3)
+colnames(brasil4)<-c("Fertilidad","PIB","Esperanza de Vida","LetradosH","LetradosM","T.Mortalidad","Crecimiento anual","PoblacionUrb")
+
+#Análisis para México
+
+cor(mexico4,use="everything",method = "pearson")
+modelome<-lm(mexico4$`Esperanza de Vida`~mexico4$Fertilidad+mexico4$PIB+mexico4$AlfabetasH+mexico4$AlfabetasM+mexico4$T.Mortalidad+mexico4$`Crecimiento anual`+mexico4$PoblacionUrb)
+summary(modelome)
+#Como podemos observar la R ajstada es de .9995 con lo cual podemos afirmar que tenemos un buen modelo,y que la recta de regresion explica en 99.95% la variablidad del modelo además cumple con el supuesto de que F>1, en este caso F vale 2767
+#Como p-value tiene un valor de .0003613, se cumple con el supuesto de que tiene que ser menor a .05
+#En este primer modelo obtendriamos la ecuacion y=1.246e+02 -4.689e+00fertilidad-5.268e-05PIB+8.016e-03alfabetasH-1.222e-02AlfabetasM -2.506e-01T.Mortalidad-1.846e-02T.Crecimiento-3.915e-01Pob.Urbana
+#1.supuesto: varianza constante
+plot(modelome,wich=1,pch=4)
+#Observamos que hay tres residuos que se distribuyen con valor , el 4, el 8 y el 10
+#2.Supuesto de normalidad
+plot(modelome,wich=2,pch=4)
+#Los residuos tipificados si estan alrededor de la linea por lo tanto se asume normalidad
+#3.Tercer supuesto
+#Los residuos están estandarizados por sus desviaciones estándar estimadas.
+plot(modelome,wich=3,pch=4)
+#Se presenta una gráfica sin patrón observable
+#4. supuesto
+plot(modelome,wich=5,pch=4)
+#Supone eliminar 4 y 1, ya que son las observaciones que podrian impactar el modelo
+modelome$ajustados<-fitted(modelome)#aqui añadimos una variable que se llama ajustados, y fitted espara calcular los valores ajustados, dentro de los parentesis se pone el modelo
+modelome$res<-residuals(modelome)
+show(modelome)
+modelome$rstud<-rstudent(modelome)
+install.packages("lmtest")
+require(lmtest)
+#Prueba de normalidad
+ks.test(modelome$rstud,"pnorm")
+#Esta prueba arroja una P-Value mayor a .05(valor de .5569), por tanto no se rechaza la hipotesis nua y se acepta que hay normalidad
+#Prueba de homogeneidad de varianzas
+bptest(modelome,studentize = FALSE,data=modelome)
+#Tenemos un p-value mayor a .05(valor de .9129), por lo tanto el modelo pasa la prueba de homogeneidad de las varianzas
+#Prueba de autocorrelación
+dwtest(modelome,alternative="two.sided",data=modelome)
+#Tenemos una p-value de .3267 y DW de 2.5364, la p-value cae dentro de los parametros aceptables, pero Dw rebasa el limite superior aceptable de 2.5
+#Con ello podemos afirmar que no hay  autoccorrelacion entre los residuos
+install.packages("car")
+require(car)
+outlierTest(modelome) 
+influencePlot(modelome)
+###########################
+install.packages("faraway")
+require(faraway)
+cooks.distance(modelome)
+dc<-cooks.distance(modelome)
+#Podemos ver que la observacion que mas influye en el modelo es la 1
+etiqueta<-rownames(modelome)
+halfnorm(dc,3, etiqueta)#el tres es para decirle que de tres observaciones, las tres con mayor distancia
+#Crearemos todas la combinaciones posibles para ver cual es el mejor modelo segun la metodologia step by step backward
+step(modelome,direction="backward")
+#El mejor modelo propuesto es el siguiente con un AIC de -95.93# preguntar si cuando los AIC son negativos cual se toma como mejor modelo 
+#Modelo nuevo: esperanza~fertilidad+pib+mortalidad
+modelonuevo<-lm(mexico4$`Esperanza de Vida`~mexico4$Fertilidad+mexico4$PIB+mexico4$T.Mortalidad)
+summary(modelonuevo)
+#como podemos observar la R ajustada mejoro, ahora tiene un valor de .9998
+#La nueva ecuación quedaria de la siguiente forma
+#y= 8.581e+01-1.731e+00fertilidad-3.611e-05PIB-2.010e-01T.Mortalidad, podemos observar tambien que ahora ya todas las variables en este modelo son significativas
+
+#Análisis Brasil
+
+cor(brasil4,use="everything",method = "pearson")
+#Se observan correlaciones muy fuertes entre hombres y mujeres alfabetizados y una correlación importante de -0.99 entre población urbana y tasa de mortalidad
+modelobr<-lm(brasil4$`Esperanza de Vida`~ brasil4$Fertilidad+brasil4$PIB+brasil4$LetradosH+brasil4$LetradosM+brasil4$T.Mortalidad+brasil4$`Crecimiento anual`+brasil4$PoblacionUrb)
+summary(modelobr)
+#se observa una F=2767, i.e. >1, p-value=0.0003613 que cumple que sea menor a 0.05 y una r ajustada muy biena de 0.9995 por lo quepodemos decir que es un buen modelo
+#La ecuación obtenida será Esperanza de vida femenina= 1.246e+02 -4.689e+00*fertilidad -5.268e-05*PIB +8.016e-03*LetradosHombres -1.222e-02*LetradasMujeres -2.506e-01*Tasademortalidad -1.846e-02*crecimientoanual -3.915e-01*poblaciónurbana
+#1er supuesto
+plot(modelobr,wich=1,pch=4)
+#Los resiudos que se distribuyen con valor son 4, 8 y 10
+#2do supuesto
+plot(modelobr,wich=2,pch=4)
+#se asume normalidad en los datos, pues están sbre la línea
+#3er supuesto
+plot(modelobr,wich=3,pch=4)
+#por las desviaciones estándar estimadas, los residuos están estandarizados, se muestra que no siguen patrón
+#4to supuesto
+plot(modelome,wich=5,pch=4)
+#Nos sugiere eliminar los datos 1, 2 y 3 pues tienen un impacto en modelo
+modelobr$ajustados<-fitted(modelobr)
+modelobr$res<-residuals(modelobr)
+modelobr$rstud<-rstudent(modelobr)
+#Prueba de normalidad
+ks.test(modelobr$rstud,"pnorm")
+#como p-value es 0.5569 es mayor a 0.05, entonces no se rechaza la hipótesis nula y se acepta normalidad
+#Prueba de homogeneidad de varianzas
+bptest(modelobr,studentize = FALSE,data=modelobr)
+#Pasa la prueba porque el p-value=0.9129 es mayor que 0.05
+#Prueba de autocorrelación
+dwtest(modelobr,alternative="two.sided",data=modelobr)
+#existe autocorrelación de los resiudos porque el p-value es 0.3267 mayor a 0.05 y el DW está dentro de los rangos
+outlierTest(modelobr) 
+influencePlot(modelobr)
+cooks.distance(modelobr)
+dcbr<-cooks.distance(modelobr)
+#Se nota que la observación que influye en el modelo es la 1
+etibr<-rownames(modelobr)
+halfnorm(dc,3, etibr)
+step(modelobr,direction="backward")
+#El mejor modelo propuesto es Esperanza de vida~ fertilidad + pib + tasa de mortalidad con un AIC de -95.93
+nuevomodbr<-lm(brasil4$`Esperanza de Vida`~brasil4$Fertilidad+brasil4$PIB+brasil4$T.Mortalidad)
+summary(nuevomodbr)
+#El p-value y la F son favorables y el r ajustado mejoró a 0.9998 
+#Está dado por la nueva ecuación: Esperanzadevida= 8.581e+01 -1.731e+00*fertilidad -3.611e-05*pib -2.010e-01*tasademortalidad
+
+#Análisis Argentina
+
+cor(argentina4,use="everything",method = "pearson")
+#Se observa fuerte correlación entre PIB y población urbana, y al haber muchos faltantes en la serie se observan muchas correlaciones NA
+modeloar<-lm(argentina4$`Esperanza de Vida`~ argentina4$Fertilidad+argentina4$PIB+argentina4$LetradosH+argentina4$LetradosM+argentina4$T.Mortalidad+argentina4$`Crecimiento anual`+argentina4$PoblacionUrb)
+summary(modeloar)
+#no se puede obtener la ecuación debido a los faltantes en los datos
+#por lo tanto no se pueden aplicar las pruebas ni los supuestos
