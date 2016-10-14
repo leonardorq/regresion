@@ -1,0 +1,82 @@
+#el  ´límite de ingocup debe ser 30000
+sdemt216<-data.frame(read.dbf("C://Users//8//Desktop//sdemt216.dbf"))
+sdemt216$EDA<-as.numeric(sdemt216$EDA)
+sdemt216$INGOCUP<-as.numeric(sdemt216$INGOCUP)
+sdemt216$SEX<-as.numeric(sdemt216$SEX)
+sdemt216$HRSOCUP<-as.numeric(sdemt216$HRSOCUP)
+sdemt216$ANIOS_ESC<-as.numeric(sdemt216$ANIOS_ESC)
+base1<-subset(sdemt216,sdemt216$CD_A==25&sdemt216$REMUNE2C==1)
+var<-c("INGOCUP","SEX","EDA","HRSOCUP","ANIOS_ESC")
+base2<-base1[,var]
+base3<-subset(base2,base2$INGOCUP>=1&base2$INGOCUP<=30000)
+base4<-subset(base3,base3$EDA>=15&base3$EDA<=65)
+#APLICANDO LA REGRESIÓN
+help("cor")
+cor(base4,use="everything",method = "pearson")
+#INGOCUP         SEX         EDA     HRSOCUP   ANIOS_ESC
+#INGOCUP    1.0000000 -0.12457554  0.19565721  0.17949426  0.37542980
+#SEX       -0.1245755  1.00000000  0.04876588 -0.23697425  0.07136474
+#EDA        0.1956572  0.04876588  1.00000000  0.06737614 -0.13882908
+#HRSOCUP    0.1794943 -0.23697425  0.06737614  1.00000000 -0.03914907
+#ANIOS_ESC  0.3754298  0.07136474 -0.13882908 -0.03914907  1.00000000
+
+#################################################################################################################
+modelo<-lm(base4$INGOCUP~base4$SEX+base4$EDA+base4$HRSOCUP+base4$ANIOS_ESC)
+summary(modelo)
+#Podemos observar que con este modelo solo tres variables salen significativas y tenemos una R ajustada muy baja con un valor de .2501
+#La ecuación con este modelo sería ingocup=-1875.407-1247.302sex+ 98.305EDA+43.966HRSOCUP+ 467.13ANIOS_ESC
+#1.supuesto: varianza constante
+plot(modelo,which=1,pch=4)
+#Observamos que aquellos elementos que podrian tener alta incidencia en nuestro modelo son las observaciones 1421,1194
+#2.Supuesto de normalidad
+plot(modelo,which=2,pch=4)
+#Los residuos tipificados si estan alrededor de la linea por lo tanto se asume normalidad,salvo en el quaintil 2 que está un poco desviado
+#3.Tercer supuesto
+#Los residuos están estandarizados por sus desviaciones estándar estimadas.
+plot(modelo,which=3,pch=4)
+#Se presenta una gráfica con un patrón en conjunto al suroeste
+#4. supuesto
+plot(modelo,which=5,pch=4)
+modelo$ajustados<-fitted(modelo)#aqui añadimos una variable que se llama ajustados
+modelo$res<-residuals(modelo)
+modelo$rstud<-rstudent(modelo)
+########################################################################################################3
+install.packages("lmtest")
+require(lmtest)
+#Prueba de normalidad
+ks.test(modelo$rstud,"pnorm")
+#Esta prueba arroja una P-Value menor a .05(valor de .2.2e-16), por tanto   se rechaza la hipotesis nula y  no se acepta que hay normalidad y un valor D=.13213
+#Prueba de homogeneidad de varianzas
+bptest(modelo,studentize = FALSE,data=modelo)
+#Prueba de autocorrelación
+dwtest(modelo,alternative="two.sided",data=modelo)
+#Tenemos una p-value de 5.24e-07 y DW de 1.7527, la p-value  no cae dentro de los parametros aceptables, Y Dw  está en  limite  aceptable
+install.packages("car")
+require(car)
+outlierTest(modelo) 
+influencePlot(modelo)
+#############################################################################################################
+install.packages("faraway")
+require(faraway)
+cooks.distance(modelo)
+dc<-cooks.distance(modelo)
+#Podemos ver que la observacion que mas influye en el modelo es la 1194
+etiqueta<-rownames(modelo)
+halfnorm(dc,3, etiqueta)
+#################################################################################################################
+#Crearemos todas la combinaciones posibles para ver cual es el mejor modelo segun la metodologia step by step backward
+step(modelo,direction="backward")
+#EL método step by step no genera un nuevo modelo, así que se supone que el mejor modelo es el incial
+###############################################################################################################
+#Si queremos predecir el valor de INGOCUP
+inter<-seq(min(base4$INGOCUP),max(base4$INGOCUP), length=length(base4$INGOCUP)) 
+bolpred<-data.frame(SEX=2, HRSOCUP=35,uso=inter)
+pred<-predict(modelo,bolpred,interval= "prediction",se.fit=TRUE, data=base4) 
+head(pred$fit) 
+#fit        lwr      upr
+#4532.136 -3482.0105 12546.28
+#8983.343   976.0322 16990.65
+#7099.774  -907.3200 15106.87
+#4597.342 -3422.6390 12617.32
+#7496.184  -515.1834 15507.55
+#9009.030  1001.3857 17016.67
