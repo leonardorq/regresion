@@ -1,0 +1,36 @@
+setwd("C://Users//SALA-C30//Documents")
+require(foreign)
+sdemt216<-data.frame(read.dbf("sdemt216.dbf"))
+coe1216<-data.frame(read.dbf("coe1t216.dbf"))
+coe2216<-data.frame(read.dbf("coe2t216.dbf"))
+#Cargar la base de datos
+
+#Con las variables ID se hace el folio para poder unir las bases
+#Para concatenar una base debemos crear una variable folio que es un número gigante hecho de las otras variables
+folio<-paste(sdemt216$CD_A, sdemt216$ENT,sdemt216$CON,sdemt216$V_SEL,sdemt216$N_HOG, sdemt216$H_MUD
+             , sdemt216$N_REN)
+x<-data.frame(sdemt216,folio)
+x$folio
+
+#Se va a crear otro folio para coe1 y coe2
+folio<-paste(coe1216$CD_A, coe1216$ENT,coe1216$CON,coe1216$V_SEL,coe1216$N_HOG, coe1216$H_MUD
+             , coe1216$N_REN)
+x1<-data.frame(coe1216,folio)
+folio<-paste(coe2216$CD_A, coe2216$ENT,coe2216$CON,coe2216$V_SEL,coe2216$N_HOG, coe2216$H_MUD
+             , coe2216$N_REN)
+x2<-data.frame(coe2216,folio)
+
+#La función merge, que hace pegar x y x1 usando la columna de folio y el all.x=TRUE, hace que 
+#  las varibles que tienen el mismo nombre les agrega "  .x"
+total<-merge(x,x1,by="folio", all.x = TRUE)
+Enoetotal<-merge(total,x2,by="folio",all.x=TRUE)
+
+#Hay otra opción para unir bases con observaciones
+#Para corroborar si están bien pegadas las bases
+ls(x)
+require(questionr)
+wtd.table(Enoetotal$SEX, Enoetotal$P1, weights = Enoetotal$FAC)
+#Tomamos sexo que solo está en sdemt y p1 que solo está en coe1, si al hacer wtd.table da resultados 
+#  coherentes, se comprueba que está bien pegada
+
+#Con la función merge buscar cómo no generar las dobles variables
