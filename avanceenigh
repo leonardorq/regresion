@@ -1,0 +1,30 @@
+install.packages("questionr")
+require(questionr)
+pobreza<-read.dbf("C:\\Users\\SALA-C29\\Desktop\\pobreza.dbf")
+pobreza1<-data.frame(pobreza)
+pobre1<-subset(pobreza1,pobreza1$ss_dir==1)
+pobre2<-subset(pobre1,pobre1$pobreza_e==1)
+
+#Recodificación edad
+pobre2$EDAD1[as.numeric(pobre2$edad)>=0& as.numeric(pobre2$edad)<=9]<-1
+pobre2$EDAD1[as.numeric(pobre2$edad)>=10& as.numeric(pobre2$edad)<=19]<-2
+pobre2$EDAD1[as.numeric(pobre2$edad)>=20& as.numeric(pobre2$edad)<=29]<-3
+pobre2$EDAD1[as.numeric(pobre2$edad)>=30& as.numeric(pobre2$edad)<=39]<-4
+pobre2$EDAD1[as.numeric(pobre2$edad)>=40& as.numeric(pobre2$edad)<=49]<-5
+pobre2$EDAD1[as.numeric(pobre2$edad)>=50& as.numeric(pobre2$edad)<=59]<-6
+pobre2$EDAD1[as.numeric(pobre2$edad)>=60& as.numeric(pobre2$edad)<=69]<-7
+pobre2$EDAD1[as.numeric(pobre2$edad)>=70& as.numeric(pobre2$edad)<=79]<-8
+pobre2$EDAD1[as.numeric(pobre2$edad)>=80& as.numeric(pobre2$edad)<=89]<-9
+pobre2$EDAD1[as.numeric(pobre2$edad)>=90& as.numeric(pobre2$edad)<=99]<-10
+
+#Recodificación tipo de trabajo
+pobre2$tiptra[as.numeric(pobre2$tipo_trab1)==1]<-1
+pobre2$tiptra[as.numeric(pobre2$tipo_trab1)==2|as.numeric(pobre2$tipo_trab1)==3]<-2
+#El valor 1 es subordinado y 2 es independiente
+
+#Recodificación condicion de actividad
+pobre2$cond[as.numeric(pobre2$inas_esc)==0]<-1#es estudiante
+pobre2$cond[as.numeric(pobre2$jub)==1]<-2#jubilado
+pobre2$cond[as.numeric(pobre2$tiptra)==1|as.numeric(pobre2$tiptra)==2]<-3#Trabajador
+
+wtd.table(pobreza$ss_dir,pobreza$pobreza_e, weights = pobreza$factor_hog)
