@@ -1,0 +1,50 @@
+require(foreign)
+setwd("C://Users//SALA-C30//Downloads")
+solrur<-data.frame(read.spss("solorural.sav"))
+#cuadro con poblacion 5 a 17---r1  
+# tamaño de muestra----r2
+# ocupados---r3
+# %ocupados----r4
+#Para niños, niñas y total
+
+#Dividir a los ocupados en grupos de 5 a 9, 10 a 13, 14 a 17, total
+require(questionr)
+wtd.table(solrur$sex,weights = solrur$fac_mti)
+r1<-c(4061217,3800117)
+r1[3]<-r1[1+2]
+wtd.table(solrur$sex)
+r2<-c(9302,8798)
+r2[3]<-r2[1]+r2[2]
+wtd.table(solrur$sex,solrur$clase2==1,weights = solrur$fac_mti)
+r3<-c(622492,204970)
+r3[3]<-r3[1]+r3[2]
+r4<-c(r3[1]/r1[1],r3[2]/r1[2],r3[3]/r1[3])
+
+#Tabla 1
+#               Niños     Niñas      Total
+#Pob 5 a 17    4061217   3800117   7861334
+#Muestra          9302      8798     18100
+#Ocupados       622492    204970    827462
+#% Ocupados     15.33%     5.39%    10.53%
+
+rur<-subset(solrur,solrur$clase2==1)
+rur$EDAD[as.numeric(rur$eda)>=5 & as.numeric(rur$eda)<=9]<-1
+rur$EDAD[as.numeric(rur$eda)>=10 & as.numeric(rur$eda)<=13]<-2
+rur$EDAD[as.numeric(rur$eda)>=14 & as.numeric(rur$eda)<=17]<-3
+wtd.table(rur$EDAD,rur$sex=="hombres",weights = rur$fac_mti)
+rr2<-c(0,121416,501076)
+rr2[4]<-rr2[1]+rr2[2]+rr2[3]
+wtd.table(rur$EDAD,rur$sex=="mujeres",weights=rur$fac_mti)
+rr3<-c(0,37279,167691)
+rr3[4]<-rr3[1]+rr3[2]+rr3[3]
+op1<-rr2[2]+rr3[2]
+op2<-rr2[3]+rr3[3]
+op1+op2
+
+#Tabla 2
+#           Niños    Niñas   Total
+# 5 a 9         0        0       0
+# 10 a 13  121416   501076  622492
+# 14 a 17   37279   167691  204970
+# Total    158695   668767  827462
+
