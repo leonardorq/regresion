@@ -1,0 +1,49 @@
+solrur$EDAD[as.numeric(solrur$eda)>=5 & as.numeric(solrur$eda)<=9]<-1
+solrur$EDAD[as.numeric(solrur$eda)>=10 & as.numeric(solrur$eda)<=13]<-2
+solrur$EDAD[as.numeric(solrur$eda)>=14 & as.numeric(solrur$eda)<=17]<-3
+
+ocup<-subset(solrur,solrur$c_ocu=="ocupado")
+#Modelo de regresión logística
+#t_per= sex + EDAD + asis + sex_jefe + escol_jefe + t_apo1 + ocu_jefe
+table(ocup$t_per)
+
+#Nueva forma de recodificar
+install.packages("plyr")
+require(plyr)
+ocup$t_per<-revalue(factor(ocup$t_per),c("4"=NA))
+table(ocup$t_per)
+#1. Familiares
+#2. No familiares
+#3. Cuenta propia
+
+table(ocup$sex)
+table(ocup$EDAD,ocup$eda)
+table(ocup$asis)
+table(ocup$sex_jefe)
+table(ocup$escol_jefe)
+ocup$escol_jefe<-revalue(factor(ocup$escol_jefe),c("7"=NA))
+table(ocup$escol_jefe)
+table(ocup$t_apo1)
+table(ocup$ocu_jefe)
+
+ocup$EDAD<-revalue(factor(ocup$EDAD),c("1"="5 a 9","2"="10 a 13","3"="15 a 19"))
+table(ocup$EDAD)
+ocup$t_per<-revalue(factor(ocup$t_per),c("1"="Familiares","2"="No familiares","3"="Cuenta propia"))
+table(ocup$t_per)
+
+library(nnet)
+#modelo de regresión logística multinomial
+mod<-multinom(t_per~1,data=ocup,trace=FALSE)
+summary(mod)
+#AIC=3129.72
+modfin<-multinom(t_per~sex+EDAD+asis+sex_jefe+escol_jefe+t_apo1+ocu_jefe,data=ocup)
+g<-summary(modfin,wald=T)
+print(g)
+#contrastar en los modelos el que tenga menor valor en AIC, en este caso AIC=1482.664
+#Por lo que se usa modfin
+
+#Función que saca tablas en LATEX
+install.packages("stargazer")
+require(stargazer)
+s<-stargazer(modfin,type="text",title="mlogit",digits=2,out="C:\\Users\\SALA-C30\\Documents\\mlogit.txt")
+#los valores son los coeficientes, en () está el error estándar y *** es que es significativo
