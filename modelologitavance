@@ -1,0 +1,39 @@
+install.packages("questionr")
+require(questionr)
+pobreza<-read.dbf("C:\\Users\\SALA-C30\\Documents\\pobreza_14.dbf")
+pobreza1<-data.frame(pobreza)
+pobre1<-subset(pobreza1,pobreza1$ss_dir==1)
+pobre2<-subset(pobre1,pobre1$pobreza_e==1)
+#Recodificación edad
+pobre2$EDAD1[as.numeric(pobre2$edad)>=0& as.numeric(pobre2$edad)<=9]<-1
+pobre2$EDAD1[as.numeric(pobre2$edad)>=10& as.numeric(pobre2$edad)<=19]<-2
+pobre2$EDAD1[as.numeric(pobre2$edad)>=20& as.numeric(pobre2$edad)<=29]<-3
+pobre2$EDAD1[as.numeric(pobre2$edad)>=30& as.numeric(pobre2$edad)<=39]<-4
+pobre2$EDAD1[as.numeric(pobre2$edad)>=40& as.numeric(pobre2$edad)<=49]<-5
+pobre2$EDAD1[as.numeric(pobre2$edad)>=50& as.numeric(pobre2$edad)<=59]<-6
+pobre2$EDAD1[as.numeric(pobre2$edad)>=60& as.numeric(pobre2$edad)<=69]<-7
+pobre2$EDAD1[as.numeric(pobre2$edad)>=70& as.numeric(pobre2$edad)<=79]<-8
+pobre2$EDAD1[as.numeric(pobre2$edad)>=80& as.numeric(pobre2$edad)<=89]<-9
+pobre2$EDAD1[as.numeric(pobre2$edad)>=90& as.numeric(pobre2$edad)<=99]<-10
+
+#Recodificación tipo de trabajo
+pobre2$tiptra[as.numeric(pobre2$tipo_trab1)==1]<-1
+pobre2$tiptra[as.numeric(pobre2$tipo_trab1)==2|as.numeric(pobre2$tipo_trab1)==3]<-2
+#El valor 1 es subordinado y 2 es independiente
+#Recodificación condicion de actividad
+pobre2$cond[as.numeric(pobre2$inas_esc)=="0"]<-1#es estudiante
+pobre2$cond[as.numeric(pobre2$jub)==1]<-2#jubilado
+pobre2$cond[as.numeric(pobre2$tiptra)==1|as.numeric(pobre2$tiptra)==2]<-3#Trabajador
+
+pobre2$EDAD1<-revalue(factor(pobre2$EDAD1),c("1"="0 a 9","2"="10 a 19","3"="20 a 29","4"="30 a 39",
+              "5"="40 a 49","6"= "50 a 59", "7"="60 a 69","8"="70 a 79", "9"="80 a 89","10"="90 a 99"))
+table(pobre2$EDAD1)
+pobre2$tiptra<-revalue(factor(pobre2$tiptra),c("1"="Subordinado","2"="Independiente"))
+table(pobre2$tiptra)
+pobre2$cond<-revalue(factor(pobre2$cond),c("1"="Estudiante","2"="Jubilado","3"="Trabajador"))
+table(pobre2$cond)
+pobre2$niv_ed<-revalue(factor(pobre2$niv_ed),c("0"="Primaria incompleta","1"="Primaria completa","2"="Secundaria completa o más"))
+table(pobre2$niv_ed)
+library(nnet)
+mode<-multinom(pobreza_e~1,data=pobre2,trace=FALSE)
+summary(mod)
