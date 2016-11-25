@@ -1,0 +1,77 @@
+install.packages("questionr")
+require(questionr)
+require(foreign)
+pobreza<-read.dbf("C:\\Users\\SALA-C30\\Documents\\pobreza_14.dbf")
+pobreza1<-data.frame(pobreza)
+pobre1<-subset(pobreza1,pobreza1$ss_dir==1)
+#pobre2<-subset(pobre1,pobre1$pobreza_e==1)
+#Recodificación edad
+pobre1$EDAD1[as.numeric(pobre1$edad)>=0& as.numeric(pobre1$edad)<=9]<-1
+pobre1$EDAD1[as.numeric(pobre1$edad)>=10& as.numeric(pobre1$edad)<=19]<-2
+pobre1$EDAD1[as.numeric(pobre1$edad)>=20& as.numeric(pobre1$edad)<=29]<-3
+pobre1$EDAD1[as.numeric(pobre1$edad)>=30& as.numeric(pobre1$edad)<=39]<-4
+pobre1$EDAD1[as.numeric(pobre1$edad)>=40& as.numeric(pobre1$edad)<=49]<-5
+pobre1$EDAD1[as.numeric(pobre1$edad)>=50& as.numeric(pobre1$edad)<=59]<-6
+pobre1$EDAD1[as.numeric(pobre1$edad)>=60& as.numeric(pobre1$edad)<=69]<-7
+pobre1$EDAD1[as.numeric(pobre1$edad)>=70& as.numeric(pobre1$edad)<=79]<-8
+pobre1$EDAD1[as.numeric(pobre1$edad)>=80& as.numeric(pobre1$edad)<=89]<-9
+pobre1$EDAD1[as.numeric(pobre1$edad)>=90& as.numeric(pobre1$edad)<=99]<-10
+
+#Recodificación tipo de trabajo
+pobre1$tiptra[as.numeric(pobre1$tipo_trab1)==1]<-1
+pobre1$tiptra[as.numeric(pobre1$tipo_trab1)==2|as.numeric(pobre1$tipo_trab1)==3]<-2
+#El valor 1 es subordinado y 2 es independiente
+#Recodificación condicion de actividad
+pobre1$cond[as.numeric(pobre1$inas_esc)==0]<-1#es estudiante
+pobre1$cond[as.numeric(pobre1$jub)==1]<-2#jubilado
+pobre1$cond[as.numeric(pobre1$tiptra)==1|as.numeric(pobre1$tiptra)==2]<-3#Trabajador
+install.packages("plyr")
+table(pobre1$cond)
+require(plyr)
+pobre1$EDAD1<-revalue(factor(pobre1$EDAD1),c("1"="0 a 9","2"="10 a 19","3"="20 a 29","4"="30 a 39",
+              "5"="40 a 49","6"= "50 a 59", "7"="60 a 69","8"="70 a 79", "9"="80 a 89","10"="90 a 99"))
+table(pobre1$EDAD1)
+pobre1$tiptra<-revalue(factor(pobre1$tiptra),c("1"="Subordinado","2"="Independiente"))
+table(pobre1$tiptra)
+pobre1$cond<-revalue(factor(pobre1$cond),c("1"="Estudiante","2"="Jubilado","3"="Trabajador"))
+table(pobre1$cond)
+pobre1$niv_ed<-revalue(factor(pobre1$niv_ed),c("0"="Primaria incompleta","1"="Primaria completa","2"="Secundaria completa o más"))
+table(pobre1$niv_ed)
+pobre1library(nnet)
+pobre1$pobreza_m<-revalue(factor(pobre1$pobreza_m),c("0"="No pobre moderado","1"="Pobre moderado"))
+table(pobre1$pobreza_m)
+pobre1$sexo<-revalue(factor(pobre1$sexo),c("1"="Hombre","2"="Mujer"))
+modelo<-multinom(pobreza_m~1,data=pobre1)
+summary(modelo)
+#AIC=22871.79
+mod1<-multinom(pobreza_m~sexo+EDAD1+tiptra+niv_ed+cond,data=pobre1)
+g<-summary(mod1,wald=T)
+print(g)
+table(pobre1$pobreza_e)
+table(pobre1$pobreza_m)
+require(stargazer)
+s<-stargazer(mod1,type="text",title="mlogit",digits=2,out="C:\\Users\\SALA-C30\\Desktop\\pobre.txt")
+sexmujer<-exp(-0.18)
+edad10<-exp(1.19)
+edad20<-exp(0.66)
+edad30<-exp(0.34)
+edad40<-exp(-0.003)
+edad50<-exp(-0.50)
+edad60<-exp(-0.75)
+edad70<-exp(-0.78)
+edad80<-exp(-0.57)
+edad90<-exp(-0.45)
+tip<-exp(0.44)
+edpri<-exp(-1.12)
+edsec<-exp(-2.51)
+cjub<-exp(0)
+ctra<-exp(0.5)
+c<-exp(-0.86)
+v1<-c("sexmujer","edad10","edad20","edad30","edad40","edad50","edad60","edad70","edad80","edad90","tip","edpri","edsec","cjub","ctra","c")
+v2<-c(sexmujer,edad10,edad20,edad30,edad40,edad50,edad60,edad70,edad80,edad90,tip,edpri,edsec,cjub,ctra,c)
+resultado<-data.frame(v1,v2)
+
+install.packages("XLConnect")
+write.csv(resultado,"C:\\Users\\SALA-C30\\Desktop\\res.csv")
+
+resul<-data.frame(read.csv("C:\\Users\\SALA-C30\\Desktop\\res1.csv"))
